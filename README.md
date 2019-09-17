@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/pyombi.svg)](https://badge.fury.io/py/pyombi)
+
 # pyombi
 
 This is a project for retrieving information from an Ombi instance using their API.
