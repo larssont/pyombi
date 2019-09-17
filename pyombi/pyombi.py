@@ -84,7 +84,3 @@ class Ombi(object):
     @property
     def recently_added_tv(self):
         return self._recently_added_tv
-
-    @property
-    def mybase(self):
-        return self._base_url
