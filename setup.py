@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name="pyombi",
-    version="0.0.1",
+    version="0.0.2",
     url="https://github.com/larssont/pyombi",
     author="Tommy Larsson",
     author_email="larssont@tuta.io",
     description="A python module to retrieve information from Ombi.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    py_modules="pyombi",
+    py_modules=["pyombi"],
     package_dir={"": "pyombi"},
     install_requires=["requests"],
     classifiers=[
