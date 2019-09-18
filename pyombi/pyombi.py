@@ -5,8 +5,6 @@ For license information, see the LICENSE.txt file.
 
 import logging
 
-import requests
-
 _LOGGER = logging.getLogger(__name__)
 _BASE_URL = "http{ssl}://{host}:{port}/{urlbase}api/v1/"
 
@@ -29,11 +27,28 @@ class Ombi(object):
         self._pending_requests = (None,)
 
     def test_connection(self):
+        self._request_connection(path="Status", is_test=True)
+
+    def update(self):
+        self._movie_requests = self._request_connection("Request/movie/total").text
+        self._tv_requests = self._request_connection("Request/tv/total").text
+
+        pending = self._request_connection("Request/count").json().get("pending")
+        self._pending_requests = pending
+
+    def _request_connection(self, path, is_test=False):
+
+        import requests
+
+        url = f"{self._base_url}{path}"
+
         try:
-            res = self._request_connection("Status")
+            res = requests.get(url, headers={"ApiKey": self._api_key}, timeout=8)
             res.raise_for_status()
-            res.json()
-            return res.status_code
+            if is_test:
+                return res.status_code
+            else:
+                return res
         except requests.exceptions.Timeout:
             raise OmbiError("Request timed out. Check port configuration.")
         except requests.exceptions.ConnectionError:
@@ -48,17 +63,6 @@ class Ombi(object):
                 raise OmbiError("HTTP Error. Check SSL configuration.")
         except ValueError:
             raise OmbiError("ValueError. Check urlbase configuration.")
-
-    def update(self):
-        self._movie_requests = self._request_connection("Request/movie/total").text
-        self._tv_requests = self._request_connection("Request/tv/total").text
-
-        pending = self._request_connection("Request/count").json().get("pending")
-        self._pending_requests = pending
-
-    def _request_connection(self, path):
-        url = f"{self._base_url}{path}"
-        return requests.get(url, headers={"ApiKey": self._api_key}, timeout=8)
 
     @property
     def movie_requests(self):
