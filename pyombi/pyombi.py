@@ -33,19 +33,23 @@ class Ombi(object):
     def test_connection(self):
         try:
             res = self._request_connection("Status")
-            res.json()
             res.raise_for_status()
+            res.json()
             return res.status_code
         except requests.exceptions.Timeout:
-            return "timeout"
+            raise OmbiError("Request timed out. Check port configuration.")
         except requests.exceptions.ConnectionError:
-            return "connection error"
+            raise OmbiError("Connection error. Check host configuration.")
         except requests.exceptions.TooManyRedirects:
-            return "too many redirects"
+            raise OmbiError("Too many redirects.")
         except requests.exceptions.HTTPError as e:
-            return e.response.status_code
+            status = e.response.status_code
+            if status == 401:
+                raise OmbiError("Authentication error. Check API key configuration.")
+            else:
+                raise OmbiError("HTTP Error. Check SSL configuration.")
         except ValueError:
-            return "value error"
+            raise OmbiError("ValueError. Check urlbase configuration.")
 
     def update(self):
         self._movie_requests = self._request_connection("Request/movie/total").text
@@ -87,3 +91,7 @@ class Ombi(object):
     @property
     def recently_added_tv(self):
         return self._recently_added_tv
+
+
+class OmbiError(Exception):
+    pass
