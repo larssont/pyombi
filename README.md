@@ -18,7 +18,9 @@ pip install pyombi
 
 #### Creating an object of your Ombi instance
 ```python
-hello = Ombi(
+import pyombi
+
+ombi = pyombi.Ombi(
     ssl=True,
     host="192.168.1.120",
     port="5000",
@@ -29,29 +31,21 @@ hello = Ombi(
 #### Testing connection to Ombi
 
 ```python
-res = hello.test_connection()
-
-if res == "200":
-    print("Success!")
-else:
-    print(res)
+try:
+    ombi.test_connection()
+except pyombi.OmbiError as e:
+    print(e)
+    return
 ```
-
-#### Updating stored data
-```python
-hello.update()
-```
-
 
 #### Retrieving data
 ```python
-movies = hello.movie_requests
-tv_shows = hello.tv_requests
+movies = ombi.movie_requests
+tv = ombi.tv_requests
 
-pending = hello.pending_requests
-
-recent_movies = hello.recently_added_movies
-recent_tv = hello.recently_added_tv
+pending = ombi.pending_requests
+approved = ombi.approved_requests
+available = ombi.available_requests
 ```
 
 # License
