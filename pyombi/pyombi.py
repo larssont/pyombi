@@ -33,6 +33,7 @@ class Ombi(object):
     def test_connection(self):
         try:
             res = self._request_connection("Status")
+            res.json()
             res.raise_for_status()
             return res.status_code
         except requests.exceptions.Timeout:
@@ -43,6 +44,8 @@ class Ombi(object):
             return "too many redirects"
         except requests.exceptions.HTTPError as e:
             return e.response.status_code
+        except ValueError:
+            return "value error"
 
     def update(self):
         self._movie_requests = self._request_connection("Request/movie/total").text
