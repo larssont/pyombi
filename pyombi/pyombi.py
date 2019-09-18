@@ -29,13 +29,6 @@ class Ombi(object):
     def test_connection(self):
         self._request_connection(path="Status", is_test=True)
 
-    def update(self):
-        self._movie_requests = self._request_connection("Request/movie/total").text
-        self._tv_requests = self._request_connection("Request/tv/total").text
-
-        pending = self._request_connection("Request/count").json().get("pending")
-        self._pending_requests = pending
-
     def _request_connection(self, path, is_test=False):
 
         import requests
@@ -66,15 +59,23 @@ class Ombi(object):
 
     @property
     def movie_requests(self):
-        return self._movie_requests
+        return self._request_connection("Request/movie/total").text
 
     @property
     def tv_requests(self):
-        return self._tv_requests
+        return self._request_connection("Request/tv/total").text
 
     @property
     def pending_requests(self):
-        return self._pending_requests
+        return self._request_connection("Request/count").json().get("pending")
+
+    @property
+    def approved_requests(self):
+        return self._request_connection("Request/count").json().get("approved")
+
+    @property
+    def available_requests(self):
+        return self._request_connection("Request/count").json().get("available")
 
 
 class OmbiError(Exception):
