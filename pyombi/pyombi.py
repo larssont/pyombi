@@ -27,8 +27,6 @@ class Ombi(object):
         self._movie_requests = (None,)
         self._tv_requests = (None,)
         self._pending_requests = (None,)
-        self._recently_added_movies = ({},)
-        self._recently_added_tv = ({},)
 
     def test_connection(self):
         try:
@@ -58,16 +56,6 @@ class Ombi(object):
         pending = self._request_connection("Request/count").json().get("pending")
         self._pending_requests = pending
 
-        def iterate_media(path):
-            media = {}
-            res = self._request_connection(path)
-            for entry in res.json():
-                media[entry.get("title")] = entry.get("addedAt")
-            return media
-
-        self._recently_added_movies = iterate_media("RecentlyAdded/movies")
-        self._recently_added_tv = iterate_media("RecentlyAdded/tv/grouped")
-
     def _request_connection(self, path):
         url = f"{self._base_url}{path}"
         return requests.get(url, headers={"ApiKey": self._api_key}, timeout=8)
@@ -83,14 +71,6 @@ class Ombi(object):
     @property
     def pending_requests(self):
         return self._pending_requests
-
-    @property
-    def recently_added_movies(self):
-        return self._recently_added_movies
-
-    @property
-    def recently_added_tv(self):
-        return self._recently_added_tv
 
 
 class OmbiError(Exception):
