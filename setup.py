@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="pyombi",
-    version="0.0.5",
+    version="0.0.6",
     url="https://github.com/larssont/pyombi",
     author="Tommy Larsson",
     author_email="larssont@tuta.io",
