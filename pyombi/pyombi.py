@@ -34,21 +34,15 @@ class Ombi(object):
             if post_data is not None:
                 res = requests.post(
                     url=f"{self._base_url}{path}",
-                    headers={
-                        "ApiKey": self._api_key,
-                        "UserName": self._username
-                    },
+                    headers={"ApiKey": self._api_key, "UserName": self._username},
                     json=post_data,
-                    timeout=8
+                    timeout=8,
                 )
             else:
                 res = requests.get(
                     url=f"{self._base_url}{path}",
-                    headers={
-                        "ApiKey": self._api_key,
-                        "UserName": self._username
-                    },
-                    timeout=8
+                    headers={"ApiKey": self._api_key, "UserName": self._username},
+                    timeout=8,
                 )
 
             res.raise_for_status()
@@ -66,7 +60,9 @@ class Ombi(object):
         except requests.exceptions.HTTPError as err:
             status = err.response.status_code
             if status == 401:
-                raise OmbiError("Authentication error. Check API key and username configuration.")
+                raise OmbiError(
+                    "Authentication error. Check API key and username configuration."
+                )
             else:
                 raise OmbiError("HTTP Error. Check SSL configuration.")
         except ValueError:
@@ -85,7 +81,9 @@ class Ombi(object):
         data = {"theMovieDbId": movie_id}
         return self._request_connection("Request/movie", post_data=data)
 
-    def request_tv(self, tv_id, request_all=False, request_latest=False, request_first=False):
+    def request_tv(
+        self, tv_id, request_all=False, request_latest=False, request_first=False
+    ):
         data = {
             "tvDbId": tv_id,
             "latestSeason": request_latest,
