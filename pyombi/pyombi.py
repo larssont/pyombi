@@ -85,8 +85,13 @@ class Ombi(object):
         data = {"theMovieDbId": movie_id}
         return self._request_connection("Request/movie", post_data=data)
 
-    def request_tv(self, tv_id):
-        data = {"tvDbId": tv_id}
+    def request_tv(self, tv_id, request_all=False, request_latest=False, request_first=False):
+        data = {
+            "tvDbId": tv_id,
+            "latestSeason": request_latest,
+            "requestAll": request_all,
+            "firstSeason": request_first,
+        }
         return self._request_connection("Request/tv", post_data=data)
 
     def request_music(self, album_id):
@@ -106,7 +111,7 @@ class Ombi(object):
         return self._request_connection("Request/music/total").text
 
     @property
-    def count_requests(self):
+    def total_requests(self):
         return self._request_connection("Request/count").json()
 
 
