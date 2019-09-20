@@ -12,8 +12,9 @@ _BASE_URL = "http{ssl}://{host}:{port}/{urlbase}api/v1/"
 class Ombi(object):
     """A class for handling connections with an Ombi instance."""
 
-    def __init__(self, ssl, host, port, api_key, urlbase=""):
+    def __init__(self, api_key, username, ssl, host, port, urlbase=""):
         self._api_key = api_key
+        self._username = username
 
         urlbase = urlbase.strip("/")
         if urlbase:
@@ -22,23 +23,37 @@ class Ombi(object):
         self._base_url = _BASE_URL.format(
             ssl="s" if ssl else "", host=host, port=port, urlbase=urlbase
         )
-        self._movie_requests = (None,)
-        self._tv_requests = (None,)
-        self._pending_requests = (None,)
 
     def test_connection(self):
-        self._request_connection(path="Status", is_test=True)
+        self._request_connection(path="Status", return_status=True)
 
-    def _request_connection(self, path, is_test=False):
-
+    def _request_connection(self, path, return_status=False, post_data=None):
         import requests
 
-        url = f"{self._base_url}{path}"
-
         try:
-            res = requests.get(url, headers={"ApiKey": self._api_key}, timeout=8)
+            if post_data is not None:
+                res = requests.post(
+                    url=f"{self._base_url}{path}",
+                    headers={
+                        "ApiKey": self._api_key,
+                        "UserName": self._username
+                    },
+                    json=post_data,
+                    timeout=8
+                )
+            else:
+                res = requests.get(
+                    url=f"{self._base_url}{path}",
+                    headers={
+                        "ApiKey": self._api_key,
+                        "UserName": self._username
+                    },
+                    timeout=8
+                )
+
             res.raise_for_status()
-            if is_test:
+
+            if return_status:
                 return res.status_code
             else:
                 return res
@@ -57,6 +72,27 @@ class Ombi(object):
         except ValueError:
             raise OmbiError("ValueError. Check urlbase configuration.")
 
+    def search_movie(self, query):
+        return self._request_connection(f"Search/movie/{query}")
+
+    def search_tv(self, query):
+        return self._request_connection(f"Search/tv/{query}")
+
+    def search_music_album(self, query):
+        return self._request_connection(f"Search/music/album/{query}")
+
+    def request_movie(self, movie_id):
+        data = {"theMovieDbId": movie_id}
+        return self._request_connection("Request/movie", post_data=data)
+
+    def request_tv(self, tv_id):
+        data = {"tvDbId": tv_id}
+        return self._request_connection("Request/tv", post_data=data)
+
+    def request_music(self, album_id):
+        data = {"foreignAlbumId": album_id}
+        return self._request_connection("Request/music", post_data=data)
+
     @property
     def movie_requests(self):
         return self._request_connection("Request/movie/total").text
@@ -66,16 +102,12 @@ class Ombi(object):
         return self._request_connection("Request/tv/total").text
 
     @property
-    def pending_requests(self):
-        return self._request_connection("Request/count").json().get("pending")
+    def music_requests(self):
+        return self._request_connection("Request/music/total").text
 
     @property
-    def approved_requests(self):
-        return self._request_connection("Request/count").json().get("approved")
-
-    @property
-    def available_requests(self):
-        return self._request_connection("Request/count").json().get("available")
+    def count_requests(self):
+        return self._request_connection("Request/count").json()
 
 
 class OmbiError(Exception):
