@@ -66,7 +66,8 @@ class Ombi(object):
         except requests.exceptions.HTTPError as e:
             status = e.response.status_code
             if status == 401:
-                raise OmbiError("Authentication error. Check API key configuration.")
+                print(e)
+                raise OmbiError("Authentication error. Check API key and username configuration.")
             else:
                 raise OmbiError("HTTP Error. Check SSL configuration.")
         except ValueError:

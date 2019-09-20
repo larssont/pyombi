@@ -25,6 +25,7 @@ ombi = pyombi.Ombi(
     host="192.168.1.120",
     port="5000",
     api_key="pixf64thuh2m7kbwwgkqp52yznbj4oyo",
+    username="MyUsername"
 )
 ```
 
