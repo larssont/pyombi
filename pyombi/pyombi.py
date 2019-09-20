@@ -63,10 +63,9 @@ class Ombi(object):
             raise OmbiError("Connection error. Check host configuration.")
         except requests.exceptions.TooManyRedirects:
             raise OmbiError("Too many redirects.")
-        except requests.exceptions.HTTPError as e:
-            status = e.response.status_code
+        except requests.exceptions.HTTPError as err:
+            status = err.response.status_code
             if status == 401:
-                print(e)
                 raise OmbiError("Authentication error. Check API key and username configuration.")
             else:
                 raise OmbiError("HTTP Error. Check SSL configuration.")
