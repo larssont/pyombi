@@ -44,9 +44,22 @@ except pyombi.OmbiError as e:
 movies = ombi.movie_requests
 tv = ombi.tv_requests
 
-pending = ombi.pending_requests
-approved = ombi.approved_requests
-available = ombi.available_requests
+total = ombi.total_requests
+```
+
+#### Searching
+
+```python
+movie_search = ombi.search_movie("Movie Name")  
+tv_search = ombi.search_tv("TV show name")
+music_search = ombi.search_music_album("Album name")
+```
+
+#### Requesting
+```python
+ombi.request_movie("theMovieDbId")
+ombi.request_tv("theTvDbId", request_latest=True)
+ombi.request_music("foreignAlbumId")
 ```
 
 # License
