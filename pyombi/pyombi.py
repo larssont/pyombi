@@ -98,15 +98,24 @@ class Ombi(object):
 
     @property
     def movie_requests(self):
-        return self._request_connection("Request/movie/total").text
+        requests = self._request_connection("Request/movie/total").text
+        if requests is None:
+            return 0
+        return requests
 
     @property
     def tv_requests(self):
-        return self._request_connection("Request/tv/total").text
+        requests = self._request_connection("Request/tv/total").text
+        if requests is None:
+            return 0
+        return requests
 
     @property
     def music_requests(self):
-        return self._request_connection("Request/music/total").text
+        requests = self._request_connection("Request/music/total").text
+        if requests is None:
+            return 0
+        return requests
 
     @property
     def total_requests(self):
