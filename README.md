@@ -43,6 +43,7 @@ except pyombi.OmbiError as e:
 ```python
 movies = ombi.movie_requests
 tv = ombi.tv_requests
+music = ombi.music_requests
 
 total = ombi.total_requests
 ```
