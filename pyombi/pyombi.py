@@ -64,18 +64,18 @@ class Ombi(object):
                     "Authentication error. Check API key and username configuration."
                 )
             else:
-                raise OmbiError("HTTP Error. Check SSL configuration.")
+                raise OmbiError(f"HTTP Error {status}. Check SSL configuration.")
         except ValueError:
             raise OmbiError("ValueError. Check urlbase configuration.")
 
     def search_movie(self, query):
-        return self._request_connection(f"Search/movie/{query}")
+        return self._request_connection(f"Search/movie/{query}").json()
 
     def search_tv(self, query):
-        return self._request_connection(f"Search/tv/{query}")
+        return self._request_connection(f"Search/tv/{query}").json()
 
     def search_music_album(self, query):
-        return self._request_connection(f"Search/music/album/{query}")
+        return self._request_connection(f"Search/music/album/{query}").json()
 
     def request_movie(self, movie_id):
         data = {"theMovieDbId": movie_id}
