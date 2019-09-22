@@ -46,6 +46,7 @@ class Ombi(object):
                 )
 
             res.raise_for_status()
+            res.json()
 
             if return_status:
                 return res.status_code
