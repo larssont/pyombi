@@ -16,10 +16,6 @@ class Ombi(object):
         self._api_key = api_key
         self._username = username
 
-        urlbase = urlbase.strip("/")
-        if urlbase:
-            urlbase = f"{urlbase}/"
-
         self._base_url = _BASE_URL.format(
             ssl="s" if ssl else "", host=host, port=port, urlbase=urlbase
         )
