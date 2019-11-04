@@ -70,7 +70,8 @@ class Ombi(object):
     def authenticate(self):
 
         if self._api_key:
-            return {"ApiKey": self._api_key}
+            self._auth = {"ApiKey": self._api_key}
+            return
 
         credentials = {"userName": self._username, "password": self._password}
 
