@@ -1,4 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/pyombi.svg)](https://badge.fury.io/py/pyombi)
+[![Downloads](https://pepy.tech/badge/pyombi)](https://pepy.tech/project/pyombi)
 
 # pyombi
 
