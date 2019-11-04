@@ -23,7 +23,7 @@ class Ombi(object):
         self._api_key = api_key
         self._username = username
         self._password = password
-        self._auth = self._authenticate()
+        self._auth = None
 
     def test_connection(self):
         self._request_connection(path="Status")
@@ -67,7 +67,7 @@ class Ombi(object):
         except ValueError:
             raise OmbiError("ValueError. Check urlbase configuration.")
 
-    def _authenticate(self):
+    def authenticate(self):
 
         if self._api_key:
             return {"ApiKey": self._api_key}
@@ -79,7 +79,7 @@ class Ombi(object):
             .json()
             .get("access_token")
         )
-        return {"Authorization": f"Bearer {token}"}
+        self._auth = {"Authorization": f"Bearer {token}"}
 
     def search_movie(self, query):
         return self._request_connection(f"Search/movie/{query}").json()
