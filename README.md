@@ -17,6 +17,8 @@ pip install pyombi
 
 
 #### Creating an object of your Ombi instance
+
+**Note:** You have to either supply an `api_key` or `password` for authentication.
 ```python
 import pyombi
 
