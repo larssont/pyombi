@@ -12,42 +12,44 @@ _BASE_URL = "http{ssl}://{host}:{port}/{urlbase}api/v1/"
 class Ombi(object):
     """A class for handling connections with an Ombi instance."""
 
-    def __init__(self, api_key, username, ssl, host, port, urlbase=""):
-        self._api_key = api_key
-        self._username = username
+    def __init__(
+        self, ssl, username, host, port, urlbase="", api_key=None, password=None
+    ):
 
         self._base_url = _BASE_URL.format(
             ssl="s" if ssl else "", host=host, port=port, urlbase=urlbase
         )
 
-    def test_connection(self):
-        self._request_connection(path="Status", return_status=True)
+        self._api_key = api_key
+        self._username = username
+        self._password = password
+        self._auth = self._authenticate()
 
-    def _request_connection(self, path, return_status=False, post_data=None):
+    def test_connection(self):
+        self._request_connection(path="Status")
+
+    def _request_connection(self, path, post_data=None, auth=True):
         import requests
 
+        headers = {"UserName": self._username}
+        if auth:
+            headers.update(**self._auth)
+
         try:
-            if post_data is not None:
-                res = requests.post(
-                    url=f"{self._base_url}{path}",
-                    headers={"ApiKey": self._api_key, "UserName": self._username},
-                    json=post_data,
-                    timeout=8,
+            if post_data is None:
+                res = requests.get(
+                    url=f"{self._base_url}{path}", headers=headers, timeout=8,
                 )
             else:
-                res = requests.get(
-                    url=f"{self._base_url}{path}",
-                    headers={"ApiKey": self._api_key, "UserName": self._username},
-                    timeout=8,
-                )
+                url = f"{self._base_url}{path}"
+                res = requests.post(url=url, json=post_data, timeout=8,)
 
             res.raise_for_status()
             res.json()
+            return res
 
-            if return_status:
-                return res.status_code
-            else:
-                return res
+        except TypeError:
+            raise OmbiError("No authentication type set.")
         except requests.exceptions.Timeout:
             raise OmbiError("Request timed out. Check port configuration.")
         except requests.exceptions.ConnectionError:
@@ -58,12 +60,26 @@ class Ombi(object):
             status = err.response.status_code
             if status == 401:
                 raise OmbiError(
-                    "Authentication error. Check API key and username configuration."
+                    "Unauthorized error. Incorrect authentication credentials or insufficient permissions."
                 )
             else:
                 raise OmbiError(f"HTTP Error {status}. Check SSL configuration.")
         except ValueError:
             raise OmbiError("ValueError. Check urlbase configuration.")
+
+    def _authenticate(self):
+
+        if self._api_key:
+            return {"ApiKey": self._api_key}
+
+        credentials = {"userName": self._username, "password": self._password}
+
+        token = (
+            self._request_connection(path="Token", post_data=credentials, auth=False)
+            .json()
+            .get("access_token")
+        )
+        return {"Authorization": f"Bearer {token}"}
 
     def search_movie(self, query):
         return self._request_connection(f"Search/movie/{query}").json()
@@ -96,23 +112,17 @@ class Ombi(object):
     @property
     def movie_requests(self):
         requests = self._request_connection("Request/movie/total").text
-        if requests is None:
-            return 0
-        return requests
+        return 0 if requests is None else requests
 
     @property
     def tv_requests(self):
         requests = self._request_connection("Request/tv/total").text
-        if requests is None:
-            return 0
-        return requests
+        return 0 if requests is None else requests
 
     @property
     def music_requests(self):
         requests = self._request_connection("Request/music/total").text
-        if requests is None:
-            return 0
-        return requests
+        return 0 if requests is None else requests
 
     @property
     def total_requests(self):
