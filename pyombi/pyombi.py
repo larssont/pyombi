@@ -31,18 +31,17 @@ class Ombi(object):
     def _request_connection(self, path, post_data=None, auth=True):
         import requests
 
+        url = f"{self._base_url}{path}"
         headers = {"UserName": self._username}
+
         if auth:
             headers.update(**self._auth)
 
         try:
             if post_data is None:
-                res = requests.get(
-                    url=f"{self._base_url}{path}", headers=headers, timeout=8,
-                )
+                res = requests.get(url=url, headers=headers, timeout=8)
             else:
-                url = f"{self._base_url}{path}"
-                res = requests.post(url=url, json=post_data, timeout=8,)
+                res = requests.post(url=url, headers=headers, json=post_data, timeout=8)
 
             res.raise_for_status()
             res.json()
