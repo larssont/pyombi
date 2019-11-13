@@ -9,6 +9,13 @@ _LOGGER = logging.getLogger(__name__)
 _BASE_URL = "http{ssl}://{host}:{port}/{urlbase}api/v1/"
 
 
+def request(f):
+    r = f().json()
+    if r["isError"]:
+        raise OmbiError(r["errorMessage"])
+    return r
+
+
 class Ombi(object):
     """A class for handling connections with an Ombi instance."""
 
@@ -45,6 +52,7 @@ class Ombi(object):
 
             res.raise_for_status()
             res.json()
+
             return res
 
         except TypeError:
@@ -58,9 +66,7 @@ class Ombi(object):
         except requests.exceptions.HTTPError as err:
             status = err.response.status_code
             if status == 401:
-                raise OmbiError(
-                    "Unauthorized error. Incorrect authentication credentials or insufficient permissions."
-                )
+                raise OmbiError("Unauthorized error. Check authentication credentials.")
             else:
                 raise OmbiError(f"HTTP Error {status}. Check SSL configuration.")
         except ValueError:
@@ -92,7 +98,7 @@ class Ombi(object):
 
     def request_movie(self, movie_id):
         data = {"theMovieDbId": movie_id}
-        return self._request_connection("Request/movie", post_data=data)
+        request(lambda: self._request_connection(path="Request/movie", post_data=data))
 
     def request_tv(
         self, tv_id, request_all=False, request_latest=False, request_first=False
@@ -103,11 +109,11 @@ class Ombi(object):
             "requestAll": request_all,
             "firstSeason": request_first,
         }
-        return self._request_connection("Request/tv", post_data=data)
+        request(lambda: self._request_connection(path="Request/tv", post_data=data))
 
     def request_music(self, album_id):
         data = {"foreignAlbumId": album_id}
-        return self._request_connection("Request/music", post_data=data)
+        request(lambda: self._request_connection(path="Request/music", post_data=data))
 
     @property
     def movie_requests(self):
