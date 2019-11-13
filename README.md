@@ -19,6 +19,8 @@ pip install pyombi
 
 #### Creating an object of your Ombi instance
 
+**Note:** You have to supply either a `password` or an `api_key` to successfully authenticate. The `api_key` will take precedence if both are supplied.
+
 ```python
 import pyombi
 
@@ -26,9 +28,10 @@ ombi = pyombi.Ombi(
     ssl=True,
     host="192.168.1.120",
     port="5000",
-    api_key="pixf64thuh2m7kbwwgkqp52yznbj4oyo",
     urlbase="ombi/",
-    username="MyUsername"
+    username="MyUsername",
+    password="MyPassword",
+    api_key="pixf64thuh2m7kbwwgkqp52yznbj4oyo"
 )
 ```
 
@@ -37,7 +40,6 @@ ombi = pyombi.Ombi(
 ```python
 ombi.authenticate()
 ```
-**Note:** You have to either supply an `api_key` or `password` for authentication.
 
 #### Testing connection to Ombi
 
