@@ -15,7 +15,7 @@ class Ombi(object):
     """A class for handling connections with an Ombi instance."""
 
     def __init__(
-            self, ssl, username, host, port=None, urlbase="", api_key=None, password=None
+        self, ssl, username, host, port=None, urlbase="", api_key=None, password=None
     ):
 
         self._base_url = None
@@ -50,10 +50,13 @@ class Ombi(object):
             if post_data is None and put_data is None:
                 res = requests.get(url=url, headers=headers, timeout=timeout)
             elif put_data:
-                res = requests.put(url=url, headers=headers, json=put_data,
-                                   timeout=timeout)
+                res = requests.put(
+                    url=url, headers=headers, json=put_data, timeout=timeout
+                )
             else:
-                res = requests.post(url=url, headers=headers, json=post_data, timeout=timeout)
+                res = requests.post(
+                    url=url, headers=headers, json=post_data, timeout=timeout
+                )
 
             res.raise_for_status()
             res.json()
@@ -89,8 +92,8 @@ class Ombi(object):
 
         token = (
             self._request_connection(path="Token", post_data=credentials, auth=False)
-                .json()
-                .get("access_token")
+            .json()
+            .get("access_token")
         )
         self._auth = {"Authorization": f"Bearer {token}"}
 
@@ -108,19 +111,22 @@ class Ombi(object):
         request(lambda: self._request_connection(path="Request/movie", post_data=data))
 
     def request_tv(
-            self, tv_id, season, episode, request_all=False, request_latest=False, request_first=False
+        self,
+        tv_id,
+        season,
+        episode,
+        request_all=False,
+        request_latest=False,
+        request_first=False,
     ):
         data = {
             "tvDbId": tv_id,
             "latestSeason": request_latest,
             "requestAll": request_all,
             "firstSeason": request_first,
-            "seasons": [{
-                "seasonNumber": season,
-                "episodes": [{
-                    "episodeNumber": episode
-                }]
-            }]
+            "seasons": [
+                {"seasonNumber": season, "episodes": [{"episodeNumber": episode}]}
+            ],
         }
         request(lambda: self._request_connection(path="Request/tv", post_data=data))
 
@@ -130,33 +136,41 @@ class Ombi(object):
 
     def approve_movie_request(self, movie_id):
         data = {"id": movie_id}
-        request(lambda: self._request_connection(path="Request/movie/approve",
-                                                 post_data=data))
+        request(
+            lambda: self._request_connection(
+                path="Request/movie/approve", post_data=data
+            )
+        )
 
     def approve_tv_request(self, tv_id):
         data = {"id": tv_id}
-        request(lambda: self._request_connection(path="Request/tv/approve",
-                                                 post_data=data))
+        request(
+            lambda: self._request_connection(path="Request/tv/approve", post_data=data)
+        )
 
     def approve_music_request(self, album_id):
         data = {"id": album_id}
-        request(lambda: self._request_connection(path="Request/music/approve",
-                                                 post_data=data))
+        request(
+            lambda: self._request_connection(
+                path="Request/music/approve", post_data=data
+            )
+        )
 
     def deny_tv_request(self, tv_id, reason="N/A"):
         data = {"id": tv_id, "reason": reason}
-        request(lambda: self._request_connection(path="Request/tv/deny",
-                                                 put_data=data))
+        request(lambda: self._request_connection(path="Request/tv/deny", put_data=data))
 
     def deny_movie_request(self, movie_id, reason="N/A"):
         data = {"id": movie_id, "reason": reason}
-        request(lambda: self._request_connection(path="Request/movie/deny",
-                                                 put_data=data))
+        request(
+            lambda: self._request_connection(path="Request/movie/deny", put_data=data)
+        )
 
     def deny_music_request(self, album_id, reason="N/A"):
         data = {"id": album_id, "reason": reason}
-        request(lambda: self._request_connection(path="Request/music/deny",
-                                                 put_data=data))
+        request(
+            lambda: self._request_connection(path="Request/music/deny", put_data=data)
+        )
 
     @property
     def movie_requests(self):
