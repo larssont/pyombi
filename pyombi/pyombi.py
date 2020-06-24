@@ -1,12 +1,7 @@
-"""A python module to retrieve information from Ombi.
+"""A python module to interact with Ombi.
 
 For license information, see the LICENSE.txt file.
 """
-
-import logging
-
-_LOGGER = logging.getLogger(__name__)
-_BASE_URL = "http{ssl}://{host}:{port}/{urlbase}api/v1/"
 
 
 def request(f):
@@ -20,35 +15,45 @@ class Ombi(object):
     """A class for handling connections with an Ombi instance."""
 
     def __init__(
-        self, ssl, username, host, port, urlbase="", api_key=None, password=None
+            self, ssl, username, host, port=None, urlbase="", api_key=None, password=None
     ):
 
-        self._base_url = _BASE_URL.format(
-            ssl="s" if ssl else "", host=host, port=port, urlbase=urlbase
-        )
+        self._base_url = None
+        self.set_base_url(host, ssl, port, urlbase)
 
         self._api_key = api_key
         self._username = username
         self._password = password
         self._auth = None
 
+    def set_base_url(self, host, ssl, port, urlbase):
+
+        protocol = "https://" if ssl else "http://"
+        port_suffix = "" if port is None else ":" + str(port)
+        self._base_url = f"{protocol}{host}{port_suffix}{urlbase}/api/v1/"
+
     def test_connection(self):
+
         self._request_connection(path="Status")
 
-    def _request_connection(self, path, post_data=None, auth=True):
+    def _request_connection(self, path, post_data=None, put_data=None, auth=True):
         import requests
 
         url = f"{self._base_url}{path}"
         headers = {"UserName": self._username}
+        timeout = 10
 
         if auth:
             headers.update(**self._auth)
 
         try:
-            if post_data is None:
-                res = requests.get(url=url, headers=headers, timeout=8)
+            if post_data is None and put_data is None:
+                res = requests.get(url=url, headers=headers, timeout=timeout)
+            elif put_data:
+                res = requests.put(url=url, headers=headers, json=put_data,
+                                   timeout=timeout)
             else:
-                res = requests.post(url=url, headers=headers, json=post_data, timeout=8)
+                res = requests.post(url=url, headers=headers, json=post_data, timeout=timeout)
 
             res.raise_for_status()
             res.json()
@@ -67,6 +72,8 @@ class Ombi(object):
             status = err.response.status_code
             if status == 401:
                 raise OmbiError("Unauthorized error. Check authentication credentials.")
+            if status == 403:
+                raise OmbiError("Forbidden URL. Check user roles.")
             else:
                 raise OmbiError(f"HTTP Error {status}. Check SSL configuration.")
         except ValueError:
@@ -82,8 +89,8 @@ class Ombi(object):
 
         token = (
             self._request_connection(path="Token", post_data=credentials, auth=False)
-            .json()
-            .get("access_token")
+                .json()
+                .get("access_token")
         )
         self._auth = {"Authorization": f"Bearer {token}"}
 
@@ -97,23 +104,59 @@ class Ombi(object):
         return self._request_connection(f"Search/music/album/{query}").json()
 
     def request_movie(self, movie_id):
-        data = {"theMovieDbId": movie_id}
+        data = {"theMovieDbId": movie_id, "languageCode": "en"}
         request(lambda: self._request_connection(path="Request/movie", post_data=data))
 
     def request_tv(
-        self, tv_id, request_all=False, request_latest=False, request_first=False
+            self, tv_id, season, episode, request_all=False, request_latest=False, request_first=False
     ):
         data = {
             "tvDbId": tv_id,
             "latestSeason": request_latest,
             "requestAll": request_all,
             "firstSeason": request_first,
+            "seasons": [{
+                "seasonNumber": season,
+                "episodes": [{
+                    "episodeNumber": episode
+                }]
+            }]
         }
         request(lambda: self._request_connection(path="Request/tv", post_data=data))
 
     def request_music(self, album_id):
         data = {"foreignAlbumId": album_id}
         request(lambda: self._request_connection(path="Request/music", post_data=data))
+
+    def approve_movie_request(self, movie_id):
+        data = {"id": movie_id}
+        request(lambda: self._request_connection(path="Request/movie/approve",
+                                                 post_data=data))
+
+    def approve_tv_request(self, tv_id):
+        data = {"id": tv_id}
+        request(lambda: self._request_connection(path="Request/tv/approve",
+                                                 post_data=data))
+
+    def approve_music_request(self, album_id):
+        data = {"id": album_id}
+        request(lambda: self._request_connection(path="Request/music/approve",
+                                                 post_data=data))
+
+    def deny_tv_request(self, tv_id, reason="N/A"):
+        data = {"id": tv_id, "reason": reason}
+        request(lambda: self._request_connection(path="Request/tv/deny",
+                                                 put_data=data))
+
+    def deny_movie_request(self, movie_id, reason="N/A"):
+        data = {"id": movie_id, "reason": reason}
+        request(lambda: self._request_connection(path="Request/movie/deny",
+                                                 put_data=data))
+
+    def deny_music_request(self, album_id, reason="N/A"):
+        data = {"id": album_id, "reason": reason}
+        request(lambda: self._request_connection(path="Request/music/deny",
+                                                 put_data=data))
 
     @property
     def movie_requests(self):
