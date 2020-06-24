@@ -15,18 +15,25 @@ class Ombi(object):
     """A class for handling connections with an Ombi instance."""
 
     def __init__(
-        self, ssl, username, host, port=None, urlbase="", api_key=None, password=None
+        self,
+        ssl,
+        host,
+        port=None,
+        urlbase="",
+        username=None,
+        password=None,
+        api_key=None,
     ):
 
         self._base_url = None
-        self.set_base_url(host, ssl, port, urlbase)
+        self.set_base_url(ssl, host, port, urlbase)
 
         self._api_key = api_key
         self._username = username
         self._password = password
         self._auth = None
 
-    def set_base_url(self, host, ssl, port, urlbase):
+    def set_base_url(self, ssl, host, port, urlbase):
 
         protocol = "https://" if ssl else "http://"
         port_suffix = "" if port is None else ":" + str(port)
@@ -40,11 +47,13 @@ class Ombi(object):
         import requests
 
         url = f"{self._base_url}{path}"
-        headers = {"UserName": self._username}
         timeout = 10
 
+        headers = {}
         if auth:
             headers.update(**self._auth)
+        if self._username:
+            headers["UserName"] = self._username
 
         try:
             if post_data is None and put_data is None:
