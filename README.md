@@ -3,7 +3,7 @@
 
 # pyombi
 
-This is a project for interacting with an Ombi instance using their API.
+This is a project for retrieving information from an Ombi instance using their API.
 
 
 # Installation
@@ -28,11 +28,17 @@ ombi = pyombi.Ombi(
     ssl=True,
     host="192.168.1.120",
     port="5000",
-    urlbase="/ombi",
+    urlbase="ombi/",
     username="MyUsername",
     password="MyPassword",
     api_key="pixf64thuh2m7kbwwgkqp52yznbj4oyo"
 )
+```
+
+#### Authenticate
+
+```python
+ombi.authenticate()
 ```
 
 #### Testing connection to Ombi
@@ -65,20 +71,8 @@ music_search = ombi.search_music_album("Album name")
 #### Requesting
 ```python
 ombi.request_movie("theMovieDbId")
-ombi.request_tv("theTvDbId", "seasonNumber", "episodeNumber")
+ombi.request_tv("theTvDbId", request_latest=True)
 ombi.request_music("foreignAlbumId")
-```
-
-#### Approving
-```python
-ombi.approve_movie_request("theMovieDbId")
-ombi.approve_tv_request("theTvDbId")
-```
-
-#### Denying
-```python
-ombi.deny_movie_request("theMovieDbId")
-ombi.deny_tv_request("theTvDbId")
 ```
 
 # License
