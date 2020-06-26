@@ -181,23 +181,28 @@ class Ombi(object):
             lambda: self._request_connection(path="Request/music/deny", put_data=data)
         )
 
-    @property
-    def movie_requests(self):
+    def get_movie_requests(self):
+        return self._request_connection("Request/movie").json()
+
+    def get_tv_requests(self):
+        return self._request_connection("Request/tv").json()
+
+    def get_music_requests(self):
+        return self._request_connection("Request/music").json()
+
+    def get_total_movie_requests(self):
         requests = self._request_connection("Request/movie/total").text
         return 0 if requests is None else requests
 
-    @property
-    def tv_requests(self):
+    def get_total_tv_requests(self):
         requests = self._request_connection("Request/tv/total").text
         return 0 if requests is None else requests
 
-    @property
-    def music_requests(self):
+    def get_total_music_requests(self):
         requests = self._request_connection("Request/music/total").text
         return 0 if requests is None else requests
 
-    @property
-    def total_requests(self):
+    def get_total_all_requests(self):
         return self._request_connection("Request/count").json()
 
 
