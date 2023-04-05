@@ -4,9 +4,11 @@ For license information, see the LICENSE.txt file.
 """
 
 import logging
+import requests
 
 _LOGGER = logging.getLogger(__name__)
 _BASE_URL = "http{ssl}://{host}:{port}/{urlbase}api/v1/"
+_BASE_URL_V2 = "http{ssl}://{host}:{port}/{urlbase}api/v2/"
 
 
 def request(f):
@@ -27,6 +29,11 @@ class Ombi(object):
             ssl="s" if ssl else "", host=host, port=port, urlbase=urlbase
         )
 
+        self._base_url_v2 = _BASE_URL_V2.format(
+            ssl="s" if ssl else "", host=host, port=port, urlbase=urlbase
+        )
+
+
         self._api_key = api_key
         self._username = username
         self._password = password
@@ -35,10 +42,13 @@ class Ombi(object):
     def test_connection(self):
         self._request_connection(path="Status")
 
-    def _request_connection(self, path, post_data=None, auth=True):
-        import requests
+    def _request_connection(self, path, post_data=None, auth=True, v2_api=False):
+  
+        if v2_api:
+            url = f"{self._base_url_v2}{path}"
+        else:
+            url = f"{self._base_url}{path}"
 
-        url = f"{self._base_url}{path}"
         headers = {"UserName": self._username}
 
         if auth:
@@ -134,6 +144,15 @@ class Ombi(object):
     def total_requests(self):
         return self._request_connection("Request/count").json()
 
-
+    @property
+    def movie_requests_unavailable(self):
+        count = 30
+        position = 0
+        sort = "requestedDate"
+        sortOrder = "asc"
+        path = f"Requests/movie/unavailable/{count}/{position}/{sort}/{sortOrder}"
+        requests = self._request_connection(path, v2_api=True)
+        return 0 if requests is None else requests
+    
 class OmbiError(Exception):
     pass
