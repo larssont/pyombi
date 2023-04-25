@@ -144,15 +144,15 @@ class Ombi(object):
     def total_requests(self):
         return self._request_connection("Request/count").json()
 
-    @property
-    def movie_requests_unavailable(self):
-        count = 30
-        position = 0
-        sort = "requestedDate"
-        sortOrder = "asc"
-        path = f"Requests/movie/unavailable/{count}/{position}/{sort}/{sortOrder}"
-        requests = self._request_connection(path, v2_api=True)
+    def movie_requests_unavailable(self, count, position, sort, sortorder):
+        path = f"Requests/movie/unavailable/{count}/{position}/{sort}/{sortorder}"
+        requests = self._request_connection(path, v2_api=True).json()
         return 0 if requests is None else requests
+    
+    def tv_requests_unavailable(self, count, position, sort, sortorder):
+        path = f"Requests/tv/unavailable/{count}/{position}/{sort}/{sortorder}"
+        requests = self._request_connection(path, v2_api=True).json()
+        return 0 if requests is None else requests 
     
 class OmbiError(Exception):
     pass
